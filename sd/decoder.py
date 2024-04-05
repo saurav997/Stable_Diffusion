@@ -53,3 +53,50 @@ class VAE_ResidualBlock(nn.Module):
 
 
 
+class VAE_Decoder(nn.Sequential):
+    def __init__(self):
+        super().__init__(
+            nn.Conv2d(4,4,kernel_size=1 padding=0),
+            nn.Conv2d(4,512,kernel_size=3,padding =1),
+            VAE_ResidualBlock(512,512),
+            VAE_AttentionBlock(512),
+            VAE_ResidualBlock(512,512),
+            VAE_ResidualBlock(512,512),
+            VAE_ResidualBlock(512,512),
+            VAE_ResidualBlock(512,512),
+            #Image size remains the same till here i.e. (Batch_size,512,Hieght/8,Width/8)
+            # (Batch_size,512,Hieght/8,Width/8) -> (Batch_size,512,Hieght/4,Width/4)
+            nn.Upscale(scale_factor = 2),
+            nn.Conv2d(512,512,kernel_size =3,padding=1),
+
+            VAE_ResidualBlock(512,512),
+            VAE_ResidualBlock(512,512),
+            VAE_ResidualBlock(512,512),
+            # (Batch_size,512,Hieght/4,Width/4) -> (Batch_size,512,Hieght/2,Width/2)
+            nn.Upscale(scale_factor = 2),
+
+            nn.Conv2d(512,512,kernel_size =3,padding=1),
+
+            VAE_ResidualBlock(512,512//2),
+            VAE_ResidualBlock(512//2,512//2),
+            VAE_ResidualBlock(512//2,512//2),
+            # (Batch_size,256,Hieght,Width)
+            nn.Upscale(scale_factor = 2),
+            nn.Conv2d(256,256,kernel_size =3,padding=1),
+
+            VAE_ResidualBlock(256,128),
+            VAE_ResidualBlock(128,128),
+            VAE_ResidualBlock(128,128),
+
+            nn.GroupNorm(32,128),
+            nn.SiLU(),
+            # (Batch_size,3,Hieght,Width)
+            nn.Conv2d(128,3,kernel_size=3,padding=1)
+        )
+
+    def forward(self,x: torch.Tensor) -> torch.Tensor:
+        x /=0.18215
+        for module in self:
+            x = module(x)
+        return x
+        
