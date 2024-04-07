@@ -37,14 +37,6 @@ class CLIPLayer(nn.Module):
         x += residue
         return x
 
-
-        
-
-
-
-
-
-
 class CLIP(nn.Module):
     def __init__(self):
         # dimension of each token embedding will be 768 

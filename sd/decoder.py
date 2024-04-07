@@ -24,10 +24,6 @@ class VAE_AttentionBlock(nn.Module):
         #back to original dimension
         return x + residue
 
-
-        
-
-
 class VAE_ResidualBlock(nn.Module):
     def __init__(self,in_channels,out_channels):
         super.__init__()
@@ -50,8 +46,6 @@ class VAE_ResidualBlock(nn.Module):
         x = F.silu(x)
         x = self.conv_2(x)
         return x + self.residual_layer(residue)
-
-
 
 class VAE_Decoder(nn.Sequential):
     def __init__(self):
